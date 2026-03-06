@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
-use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -34,7 +33,20 @@ class CategoryController extends Controller
      */
     public function categoryStore(Request $request)
     {
-        return Category::create($request->all());
+       $category_is_valid = Category::where("id", $request->id)->first();
+
+         if ($category_is_valid) {
+            return response()->json([
+                "message" => 403,
+                "message_text" => 'el category  ya existe'
+            ]);
+        }
+
+        $category = Category::create($request->all());
+
+        $request->request->add([
+            "category_id" => $category->id
+        ]);
     }
 
     /**
@@ -43,20 +55,15 @@ class CategoryController extends Controller
      * @param  \App\Models\Category $category
      * @return \Illuminate\Http\Response
      */
-    public function categoryShow(Category $category)
+    public function categoryShow($id)
     {
         //
-        if (!$category) {
-            return response()->json([
-                'message' => 'Category not found.'
-            ], 404);
-        }
+        $category = Category::find($id);
 
         return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'category' => $category,
-        ], 200);
+            "category" => $category,
+
+        ]);
     }
 
     /**
@@ -68,27 +75,15 @@ class CategoryController extends Controller
     public function categoryUpdate(Request $request, $id)
     {
         $category = Category::findOrfail($id);
-        $category->name = $request->name;
-        $category->name_eng = $request->name_eng;
-        $category->update();
-        return $category;
+      
+        $category->update($request->all());
+
+        return response()->json([
+            "message" => 200,
+            "category" => $category
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Category $category
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Category $category)
-    {
-        $category = Category::findOrfail($id);
-        $category->name = $request->name;
-        $category->name_eng = $request->name_eng;
-        $category->update();
-        return $category;
-    }
 
     /**
      * Remove the specified resource from storage.
@@ -100,26 +95,12 @@ class CategoryController extends Controller
     {
 
         $category =  Category::where('id', $id)->first();
-
-        if(!empty($category)){
-
-             // borrar
-             $category->delete();
-             // devolver respuesta
-             $data = [
-                 'code' => 200,
-                 'status' => 'success',
-                 'category' => $category
-             ];
-         }else{
-             $data = [
-                 'code' => 404,
-                 'status' => 'error',
-                 'message' => 'el category no existe'
-             ];
-         }
-
-         return response()->json($data, $data['code']);
+        $category = Category::findOrFail($id);
+       
+        $category->delete();
+        return response()->json([
+            "message" => 200
+        ]);
     }
 
     public function search(Request $request){

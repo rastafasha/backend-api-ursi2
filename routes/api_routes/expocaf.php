@@ -15,7 +15,7 @@ Route::get('/expocaf/show/{expocaf}', [ExpocafController::class, 'show'])
     ->name('expocaf.show');
 
 
-Route::put('/expocaf/update/{expocaf}', [ExpocafController::class, 'update'])
+Route::post('/expocaf/update/{expocaf}', [ExpocafController::class, 'update'])
     ->name('expocaf.update');
 
 Route::delete('/expocaf/destroy/{expocaf}', [ExpocafController::class, 'destroy'])
@@ -24,8 +24,3 @@ Route::delete('/expocaf/destroy/{expocaf}', [ExpocafController::class, 'destroy'
 Route::put('/expocaf/update/status/{expocaf:id}', [ExpocafController::class, 'updateStatus'])
     ->name('expocaf.status');
 
-Route::post('/expocaf/upload', [ExpocafController::class, 'upload'])
-    ->name('expocaf.upload');
-
-Route::delete('/expocaf/delete-foto/{id}', [ExpocafController::class, 'deleteFoto'])
-    ->name('expocaf.deleteFoto');

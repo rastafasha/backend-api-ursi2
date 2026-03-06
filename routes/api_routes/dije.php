@@ -15,7 +15,7 @@ Route::get('/dije/show/{dije}', [DijeController::class, 'show'])
     ->name('dije.show');
 
 
-Route::put('/dije/update/{dije}', [DijeController::class, 'update'])
+Route::post('/dije/update/{dije}', [DijeController::class, 'update'])
     ->name('dije.update');
 
 Route::delete('/dije/destroy/{dije}', [DijeController::class, 'destroy'])
@@ -23,9 +23,3 @@ Route::delete('/dije/destroy/{dije}', [DijeController::class, 'destroy'])
 
 Route::put('/dije/update/status/{dije:id}', [DijeController::class, 'updateStatus'])
     ->name('dije.status');
-
-Route::post('/dije/upload', [DijeController::class, 'upload'])
-    ->name('dije.upload');
-
-Route::delete('/dije/delete-foto/{id}', [DijeController::class, 'deleteFoto'])
-    ->name('dije.deleteFoto');

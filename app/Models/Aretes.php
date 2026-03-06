@@ -13,7 +13,7 @@ class Aretes extends Model
         'model',
         'description',
         'price',
-        'image',
+        'avatar',
         'status',
     ];
 

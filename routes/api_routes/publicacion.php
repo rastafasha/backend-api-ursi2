@@ -15,7 +15,7 @@ Route::get('/publicacion/show/{publicacion}', [PublicacionController::class, 'sh
     ->name('publicacion.show');
 
 
-Route::put('/publicacion/update/{publicacion}', [PublicacionController::class, 'update'])
+Route::post('/publicacion/update/{publicacion}', [PublicacionController::class, 'update'])
     ->name('publicacion.update');
 
 Route::delete('/publicacion/destroy/{publicacion}', [PublicacionController::class, 'destroy'])
@@ -23,9 +23,3 @@ Route::delete('/publicacion/destroy/{publicacion}', [PublicacionController::clas
 
 Route::put('/publicacion/update/status/{publicacion:id}', [PublicacionController::class, 'updateStatus'])
     ->name('publicacion.status');
-
-Route::post('/publicacion/upload', [PublicacionController::class, 'upload'])
-    ->name('publicacion.upload');
-
-Route::delete('/publicacion/delete-foto/{id}', [PublicacionController::class, 'deleteFoto'])
-    ->name('publicacion.deleteFoto');

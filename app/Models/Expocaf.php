@@ -9,7 +9,7 @@ class Expocaf extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'image',
+        'avatar',
         'status',
     ];
 
