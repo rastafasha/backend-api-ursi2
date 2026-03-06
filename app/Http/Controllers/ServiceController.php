@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Servicio\ServicioCollection;
+use App\Http\Resources\Servicio\ServicioResource;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;

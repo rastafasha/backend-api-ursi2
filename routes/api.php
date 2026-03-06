@@ -174,9 +174,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     return "Route cache cleared successfully.";
 });
 
-    Route::post('file', [imageController::class, 'file'])->name('fileUpload');
-    Route::post('file/class/uploader', [imageController::class, 'fileClassUploader'])->name('fileUploaderClass');
-
+   
 
     //rutas libres
 

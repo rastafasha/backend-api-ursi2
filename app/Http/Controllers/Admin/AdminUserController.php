@@ -70,8 +70,8 @@ class AdminUserController extends Controller
         $user = User::findOrFail($id);
 
         return response()->json([
-            // "user" => $user,
-            "user" => UserResource::make($user)
+            "user" => $user,
+            // "user" => UserResource::make($user)
             
         ]);
     }

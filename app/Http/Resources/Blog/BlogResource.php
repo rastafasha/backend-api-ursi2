@@ -25,6 +25,8 @@ class BlogResource extends JsonResource
             "description"=>$this->resource->description,
             "description_eng"=>$this->resource->description_eng,
             "status"=>$this->resource->status,
+            "slug"=>$this->resource->slug,
+            "isFeatured"=>$this->resource->isFeatured,
            
             "avatar"=> $this->resource->avatar ? env("APP_URL")."storage/".$this->resource->avatar : null,
             // "avatar"=> $this->resource->avatar ? env("APP_URL").$this->resource->avatar : null,
