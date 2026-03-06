@@ -14,7 +14,7 @@ class Anillo extends Model
         'model',
         'description',
         'price',
-        'image',
+        'avatar',
         'status',
     ];
 

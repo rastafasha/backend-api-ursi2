@@ -4,12 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Aretes;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\UploadedFile;
-use App\Http\Requests\PostStoreRequest;
-use Illuminate\Support\Str;
-
+use Illuminate\Support\Facades\Storage;
 class AreteController extends Controller
 {
     //
@@ -39,7 +35,27 @@ class AreteController extends Controller
     public function store(Request $request)
     {
 
-        return Aretes::create($request->all());
+         $arete_is_valid = Aretes::where("id", $request->id)->first();
+
+        if ($arete_is_valid) {
+            return response()->json([
+                "message" => 403,
+                "message_text" => 'el arete  ya existe'
+            ]);
+        }
+
+
+        if ($request->hasFile('imagen')) {
+            $path = Storage::putFile("aretes", $request->file('imagen'));
+            $request->request->add(["avatar" => $path]);
+        }
+
+
+        $arete = Aretes::create($request->all());
+
+        $request->request->add([
+            "arete_id" => $arete->id
+        ]);
     }
 
     /**
@@ -48,20 +64,14 @@ class AreteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Aretes $arete)
+    public function show($id)
     {
 
-        if (!$arete) {
-            return response()->json([
-                'message' => 'arete not found.'
-            ], 404);
-        }
+       $arete = Arete::find($id);
 
         return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'arete' => $arete,
-        ], 200);
+            "arete" => $arete
+        ]);
     }
 
     /**
@@ -74,16 +84,20 @@ class AreteController extends Controller
     public function update(Request $request, $id)
     {
         $arete = Aretes::findOrfail($id);
-        $arete->title = $request->title;
-        $arete->model = $request->model;
-        $arete->description = $request->description;
-        $arete->price = $request->price;
-        $arete->status = $request->status;
-        if($request->image){
-            $arete->image = $request->image;
+         if ($request->hasFile('imagen')) {
+            if ($arete->avatar) {
+                Storage::delete($arete->avatar);
+            }
+            $path = Storage::putFile("aretes", $request->file('imagen'));
+            $request->request->add(["avatar" => $path]);
         }
-        $arete->update();
-        return $arete;
+
+        $arete->update($request->all());
+
+        return response()->json([
+            "message" => 200,
+            "arete" => $arete
+        ]);
     }
 
     public function updateStatus(Request $request, $id)
@@ -105,112 +119,15 @@ class AreteController extends Controller
 
         $arete =  Arete::where('id', $id)->first();
 
-        if(!empty($arete)){
-
-             // borrar
-             $arete->delete();
-             // devolver respuesta
-             $data = [
-                 'code' => 200,
-                 'status' => 'success',
-                 'arete' => $arete
-             ];
-         }else{
-             $data = [
-                 'code' => 404,
-                 'status' => 'error',
-                 'message' => 'el arete no existe'
-             ];
-         }
-
-         return response()->json($data, $data['code']);
+        $arete = Aretes::findOrFail($id);
+        if ($arete->avatar) {
+            Storage::delete($arete->avatar);
+        }
+        $arete->delete();
+        return response()->json([
+            "message" => 200
+        ]);
     }
 
 
-
-    /**
-     * @param UploadedFile $file
-     * @return string
-     */
-    protected function generateFileName(UploadedFile $file): string {
-        $extension = $file->getClientOriginalExtension();
-        $fullName = $file->getClientOriginalName();
-        $pathFileName = trim(pathinfo($fullName, PATHINFO_FILENAME));
-        $secureMaxName = substr(Str::slug($pathFileName), 0, 90);
-        return sprintf('%s-%s.%s', $secureMaxName, now()->timestamp, $extension);
-    }
-
-
-
-
-    public function upload(Request $request)
-     {
-         // recoger la imagen de la peticion
-         $image = $request->file('file0');
-         // validar la imagen
-         $validate = \Validator::make($request->all(),[
-             'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
-         ]);
-         //guardar la imagen en un disco
-         if(!$image || $validate->fails()){
-             $data = [
-                 'code' => 400,
-                 'status' => 'error',
-                 'message' => 'Error al subir la imagen'
-             ];
-         }else{
-            $extension = $image->getClientOriginalExtension();
-            $image_name = $image->getClientOriginalName();
-            $pathFileName = trim(pathinfo($image_name, PATHINFO_FILENAME));
-            $secureMaxName = substr(Str::slug($image_name), 0, 90);
-            $image_name = now().$secureMaxName.'.'.$extension;
-
-             \Storage::disk('aretes')->put($image_name, \File::get($image));
-
-             $data = [
-                 'code' => 200,
-                 'status' => 'success',
-                 'image' => $image_name
-             ];
-
-         }
-
-         return response()->json($data, $data['code']);// devuelve un objeto json
-     }
-
-     public function getImage($filename)
-     {
-
-         //comprobar si existe la imagen
-         $isset = \Storage::disk('aretes')->exists($filename);
-         if ($isset) {
-             $file = \Storage::disk('aretes')->get($filename);
-             return new Response($file, 200);
-         } else {
-             $data = array(
-                 'status' => 'error',
-                 'code' => 404,
-                 'mesaje' => 'Imagen no existe',
-             );
-
-             return response()->json($data, $data['code']);
-         }
-
-     }
-
-     public function deleteFoto($id)
-     {
-         $arete = Aretes::findOrFail($id);
-         \Storage::delete('aretes/' . $arete->image);
-         $arete->image = '';
-         $arete->save();
-         return response()->json([
-             'data' => $arete,
-             'msg' => [
-                 'summary' => 'Archivo eliminado',
-                 'detail' => '',
-                 'code' => ''
-             ]
-         ]);
-     }
 }

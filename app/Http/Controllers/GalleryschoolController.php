@@ -4,11 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Galleryschool;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\UploadedFile;
-use App\Http\Requests\PostStoreRequest;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class GalleryschoolController extends Controller
 {
@@ -38,7 +35,27 @@ class GalleryschoolController extends Controller
     public function galleryschoolStore(Request $request)
     {
 
-        return Galleryschool::create($request->all());
+         $galleryschool_is_valid = Galleryschool::where("id", $request->id)->first();
+
+        if ($galleryschool_is_valid) {
+            return response()->json([
+                "message" => 403,
+                "message_text" => 'el galleryschool  ya existe'
+            ]);
+        }
+
+
+        if ($request->hasFile('imagen')) {
+            $path = Storage::putFile("cursos", $request->file('imagen'));
+            $request->request->add(["avatar" => $path]);
+        }
+
+
+        $galleryschool = Galleryschool::create($request->all());
+
+        $request->request->add([
+            "galleryschool_id" => $galleryschool->id
+        ]);
     }
 
     /**
@@ -47,20 +64,15 @@ class GalleryschoolController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function galleryschoolShow(Galleryschool $galleryschool)
+    public function galleryschoolShow($id)
     {
 
-        if (!$galleryschool) {
-            return response()->json([
-                'message' => 'galleryschool not found.'
-            ], 404);
-        }
+      $galleryschool = Galleryschool::find($id);
 
         return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'galleryschool' => $galleryschool,
-        ], 200);
+            "galleryschool" => $galleryschool,
+
+        ]);
     }
 
     /**
@@ -73,13 +85,20 @@ class GalleryschoolController extends Controller
     public function GalleryschoolUpdate(Request $request, $id)
     {
         $galleryschool = Galleryschool::findOrfail($id);
-        $galleryschool->title = $request->title;
-        // $galleryschool->image = $request->image;
-        if($request->image){
-            $galleryschool->image = $request->image;
+        if ($request->hasFile('imagen')) {
+            if ($galleryschool->avatar) {
+                Storage::delete($galleryschool->avatar);
+            }
+            $path = Storage::putFile("galleryschools", $request->file('imagen'));
+            $request->request->add(["avatar" => $path]);
         }
-        $galleryschool->update();
-        return $galleryschool;
+
+        $galleryschool->update($request->all());
+
+        return response()->json([
+            "message" => 200,
+            "galleryschool" => $galleryschool
+        ]);
     }
 
 
@@ -94,111 +113,15 @@ class GalleryschoolController extends Controller
 
         $galleryschool =  Galleryschool::where('id', $id)->first();
 
-        if(!empty($galleryschool)){
-
-             // borrar
-             $galleryschool->delete();
-             // devolver respuesta
-             $data = [
-                 'code' => 200,
-                 'status' => 'success',
-                 'espocaf' => $galleryschool
-             ];
-         }else{
-             $data = [
-                 'code' => 404,
-                 'status' => 'error',
-                 'message' => 'el galleryschool no existe'
-             ];
-         }
-
-         return response()->json($data, $data['code']);
+        $galleryschool = Galleryschool::findOrFail($id);
+        if ($galleryschool->avatar) {
+            Storage::delete($galleryschool->avatar);
+        }
+        $galleryschool->delete();
+        return response()->json([
+            "message" => 200
+        ]);
     }
 
 
-    /**
-     * @param UploadedFile $file
-     * @return string
-     */
-    protected function generateFileName(UploadedFile $file): string {
-        $extension = $file->getClientOriginalExtension();
-        $fullName = $file->getClientOriginalName();
-        $pathFileName = trim(pathinfo($fullName, PATHINFO_FILENAME));
-        $secureMaxName = substr(Str::slug($pathFileName), 0, 90);
-        return sprintf('%s-%s.%s', $secureMaxName, now()->timestamp, $extension);
-    }
-
-
-
-
-    public function upload(Request $request)
-     {
-         // recoger la imagen de la peticion
-         $image = $request->file('file0');
-         // validar la imagen
-         $validate = \Validator::make($request->all(),[
-             'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
-         ]);
-         //guardar la imagen en un disco
-         if(!$image || $validate->fails()){
-             $data = [
-                 'code' => 400,
-                 'status' => 'error',
-                 'message' => 'Error al subir la imagen'
-             ];
-         }else{
-            $extension = $image->getClientOriginalExtension();
-            $image_name = $image->getClientOriginalName();
-            $pathFileName = trim(pathinfo($image_name, PATHINFO_FILENAME));
-            $secureMaxName = substr(Str::slug($image_name), 0, 90);
-            $image_name = now().$secureMaxName.'.'.$extension;
-
-             \Storage::disk('galleryschools')->put($image_name, \File::get($image));
-
-             $data = [
-                 'code' => 200,
-                 'status' => 'success',
-                 'image' => $image_name
-             ];
-
-         }
-
-         return response()->json($data, $data['code']);// devuelve un objeto json
-     }
-
-     public function getImage($filename)
-     {
-
-         //comprobar si existe la imagen
-         $isset = \Storage::disk('galleryschools')->exists($filename);
-         if ($isset) {
-             $file = \Storage::disk('galleryschools')->get($filename);
-             return new Response($file, 200);
-         } else {
-             $data = array(
-                 'status' => 'error',
-                 'code' => 404,
-                 'mesaje' => 'Imagen no existe',
-             );
-
-             return response()->json($data, $data['code']);
-         }
-
-     }
-
-     public function deleteFotoGalleryschool($id)
-     {
-         $galleryschool = Galleryschool::findOrFail($id);
-         \Storage::delete('galleryschools/' . $galleryschool->image);
-         $galleryschool->image = '';
-         $galleryschool->save();
-         return response()->json([
-             'data' => $galleryschool,
-             'msg' => [
-                 'summary' => 'Archivo eliminado',
-                 'detail' => '',
-                 'code' => ''
-             ]
-         ]);
-     }
 }

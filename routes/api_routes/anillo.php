@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnilloController;
 
@@ -15,7 +14,7 @@ Route::get('/anillo/show/{anillo}', [AnilloController::class, 'show'])
     ->name('anillo.show');
 
 
-Route::put('/anillo/update/{anillo}', [AnilloController::class, 'update'])
+Route::post('/anillo/update/{anillo}', [AnilloController::class, 'update'])
     ->name('anillo.update');
 
 Route::delete('/anillo/destroy/{anillo}', [AnilloController::class, 'destroy'])
@@ -23,9 +22,3 @@ Route::delete('/anillo/destroy/{anillo}', [AnilloController::class, 'destroy'])
 
 Route::put('/anillo/update/status/{anillo:id}', [AnilloController::class, 'updateStatus'])
     ->name('anillo.status');
-
-Route::post('/anillo/upload', [AnilloController::class, 'upload'])
-    ->name('anillo.upload');
-
-Route::delete('/anillo/delete-foto/{id}', [AnilloController::class, 'deleteFoto'])
-    ->name('anillo.deleteFoto');

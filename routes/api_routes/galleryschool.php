@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GalleryschoolController;
 
@@ -15,7 +14,7 @@ Route::get('/galleryschool/show/{galleryschool}', [GalleryschoolController::clas
     ->name('galleryschool.show');
 
 
-Route::put('/galleryschool/update/{galleryschool}', [GalleryschoolController::class, 'galleryschoolUpdate'])
+Route::post('/galleryschool/update/{galleryschool}', [GalleryschoolController::class, 'galleryschoolUpdate'])
     ->name('galleryschool.update');
 
 Route::delete('/galleryschool/destroy/{galleryschool}', [GalleryschoolController::class, 'destroy'])
@@ -24,8 +23,3 @@ Route::delete('/galleryschool/destroy/{galleryschool}', [GalleryschoolController
 Route::put('/galleryschool/update/status/{galleryschool:id}', [GalleryschoolController::class, 'galleryschoolUpdateStatus'])
     ->name('galleryschool.status');
 
-Route::post('/galleryschool/upload', [GalleryschoolController::class, 'upload'])
-    ->name('galleryschool.upload');
-
-Route::delete('/galleryschool/delete-foto/{id}', [GalleryschoolController::class, 'deleteFotoGalleryschool'])
-    ->name('galleryschool.deleteFotoGalleryschool');

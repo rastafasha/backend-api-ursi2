@@ -26,7 +26,7 @@ Route::get('/cursos/destacados', [CursoController::class, 'destacados'])
 Route::get('/curso/show/slug/{slug}', [CursoController::class, 'cursoShowSlug'])
     ->name('curso.cursoShowSlug');
 
-Route::put('/curso/update/{curso}', [CursoController::class, 'cursoUpdate'])
+Route::post('/curso/update/{curso}', [CursoController::class, 'cursoUpdate'])
     ->name('curso.update');
 
 Route::delete('/curso/destroy/{curso}', [CursoController::class, 'destroy'])
@@ -35,12 +35,6 @@ Route::delete('/curso/destroy/{curso}', [CursoController::class, 'destroy'])
 Route::put('/curso/update/status/{curso:id}', [CursoController::class, 'cursoUpdateStatus'])
     ->name('curso.status');
 
-Route::post('/curso/upload', [CursoController::class, 'upload'])
-    ->name('curso.upload');
-
-
-Route::delete('/curso/delete-foto/{id}', [CursoController::class, 'deleteFotoCurso'])
-    ->name('curso.deleteFotoCurso');
 
 Route::get('/curso/search/', [CursoController::class, 'search'])
     ->name('curso.search');

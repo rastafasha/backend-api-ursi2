@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Servicio;
+namespace App\Http\Resources\Curso;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use Carbon\Carbon;
-class ServicioResource extends JsonResource
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class CursoResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,18 +15,21 @@ class ServicioResource extends JsonResource
      */
     public function toArray($request)
     {
-       return [
+        return [
             "id"=>$this->resource->id,
-            "title"=>$this->resource->title,
-            "title_eng"=>$this->resource->title_eng,
-            "subtitle"=>$this->resource->subtitle,
-            "subtitle_eng"=>$this->resource->subtitle_eng,
+            "user_id"=>$this->resource->user_id,
+            "name"=>$this->resource->name,
+            "name_eng"=>$this->resource->name_eng,
+            "adicional"=>$this->resource->adicional,
+            "adicional_eng"=>$this->resource->adicional_eng,
             "description"=>$this->resource->description,
             "description_eng"=>$this->resource->description_eng,
             "status"=>$this->resource->status,
-            "model"=>$this->resource->model,
-            "videoUrl"=>$this->resource->videoUrl,
             "price"=>$this->resource->price,
+            "modal"=>$this->resource->modal,
+            "slug"=>$this->resource->slug,
+            "urlVideo"=>$this->resource->urlVideo,
+            "isFeatured"=>$this->resource->isFeatured,
            
             "avatar"=> $this->resource->avatar ? env("APP_URL")."storage/".$this->resource->avatar : null,
             // "avatar"=> $this->resource->avatar ? env("APP_URL").$this->resource->avatar : null,

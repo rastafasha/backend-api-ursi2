@@ -25,7 +25,7 @@ class Curso extends Model
         'slug',
         'user_id',
         'urlVideo',
-        'image',
+        'avatar',
         'isFeatured',
         'status',
     ];
