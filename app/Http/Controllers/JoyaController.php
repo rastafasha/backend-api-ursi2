@@ -4,11 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Joyas;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\UploadedFile;
-use App\Http\Requests\PostStoreRequest;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class JoyaController extends Controller
 {
@@ -39,7 +36,25 @@ class JoyaController extends Controller
     public function store(Request $request)
     {
 
-        return Joyas::create($request->all());
+       $joya_is_valid = Joyas::where("id", $request->id)->first();
+
+        if ($joya_is_valid) {
+            return response()->json([
+                "message" => 403,
+                "message_text" => 'el joya  ya existe'
+            ]);
+        }
+
+        if ($request->hasFile('imagen')) {
+            $path = Storage::putFile("joyas", $request->file('imagen'));
+            $request->request->add(["avatar" => $path]);
+        }
+
+        $joya = Joyas::create($request->all());
+
+        $request->request->add([
+            "joya_id" => $joya->id
+        ]);
     }
 
     /**
@@ -48,20 +63,13 @@ class JoyaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Joyas $joya)
+    public function show($id)
     {
-
-        if (!$joya) {
-            return response()->json([
-                'message' => 'joya not found.'
-            ], 404);
-        }
+        $joya = Joyas::find($id);
 
         return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'joya' => $joya,
-        ], 200);
+            "joya" => $joya
+        ]);
     }
 
     /**
@@ -74,13 +82,20 @@ class JoyaController extends Controller
     public function update(Request $request, $id)
     {
         $joya = Joyas::findOrfail($id);
-        $joya->status = $request->status;
-        // $joya->image = $request->image;
-        if($request->image){
-            $joya->image = $request->image;
+        if ($request->hasFile('imagen')) {
+            if ($joya->avatar) {
+                Storage::delete($joya->avatar);
+            }
+            $path = Storage::putFile("joyas", $request->file('imagen'));
+            $request->request->add(["avatar" => $path]);
         }
-        $joya->update();
-        return $joya;
+
+        $joya->update($request->all());
+
+        return response()->json([
+            "message" => 200,
+            "joya" => $joya
+        ]);
     }
 
     public function updateStatus(Request $request, $id)
@@ -102,112 +117,15 @@ class JoyaController extends Controller
 
         $joya =  Joyas::where('id', $id)->first();
 
-        if(!empty($joya)){
-
-             // borrar
-             $joya->delete();
-             // devolver respuesta
-             $data = [
-                 'code' => 200,
-                 'status' => 'success',
-                 'joya' => $joya
-             ];
-         }else{
-             $data = [
-                 'code' => 404,
-                 'status' => 'error',
-                 'message' => 'el joya no existe'
-             ];
-         }
-
-         return response()->json($data, $data['code']);
-    }
-
-
-    /**
-     * @param UploadedFile $file
-     * @return string
-     */
-    protected function generateFileName(UploadedFile $file): string {
-        $extension = $file->getClientOriginalExtension();
-        $fullName = $file->getClientOriginalName();
-        $pathFileName = trim(pathinfo($fullName, PATHINFO_FILENAME));
-        $secureMaxName = substr(Str::slug($pathFileName), 0, 90);
-        return sprintf('%s-%s.%s', $secureMaxName, now()->timestamp, $extension);
-    }
-
-
-
-
-    public function upload(Request $request)
-    {
-        // recoger la imagen de la peticion
-        $image = $request->file('file0');
-        // validar la imagen
-        $validate = \Validator::make($request->all(),[
-            'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
-        ]);
-        //guardar la imagen en un disco
-        if(!$image || $validate->fails()){
-            $data = [
-                'code' => 400,
-                'status' => 'error',
-                'message' => 'Error al subir la imagen'
-            ];
-        }else{
-           $extension = $image->getClientOriginalExtension();
-           $image_name = $image->getClientOriginalName();
-           $pathFileName = trim(pathinfo($image_name, PATHINFO_FILENAME));
-           $secureMaxName = substr(Str::slug($image_name), 0, 90);
-           $image_name = now().$secureMaxName.'.'.$extension;
-
-            \Storage::disk('joyas')->put($image_name, \File::get($image));
-
-            $data = [
-                'code' => 200,
-                'status' => 'success',
-                'image' => $image_name
-            ];
-
+       $joya = Joyas::findOrFail($id);
+        if ($joya->avatar) {
+            Storage::delete($joya->avatar);
         }
-
-        return response()->json($data, $data['code']);// devuelve un objeto json
+        $joya->delete();
+        return response()->json([
+            "message" => 200
+        ]);
     }
 
 
-     public function getImage($filename)
-     {
-
-         //comprobar si existe la imagen
-         $isset = \Storage::disk('joyas')->exists($filename);
-         if ($isset) {
-             $file = \Storage::disk('joyas')->get($filename);
-             return new Response($file, 200);
-         } else {
-             $data = array(
-                 'status' => 'error',
-                 'code' => 404,
-                 'mesaje' => 'Imagen no existe',
-             );
-
-             return response()->json($data, $data['code']);
-         }
-
-     }
-
-     public function deleteFoto($id)
-     {
-         $joya = Joyas::findOrFail($id);
-         \Storage::delete('joyas/' . $joya->image);
-         $joya->image = '';
-         $joya->save();
-         return response()->json([
-             'data' => $joya,
-             'msg' => [
-                 'summary' => 'Archivo eliminado',
-                 'detail' => '',
-                 'code' => ''
-             ]
-         ]);
-     }
 }

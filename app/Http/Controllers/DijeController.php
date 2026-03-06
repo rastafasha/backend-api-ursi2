@@ -4,11 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Dijes;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\UploadedFile;
-use App\Http\Requests\PostStoreRequest;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class DijeController extends Controller
 {
@@ -39,8 +36,28 @@ class DijeController extends Controller
     public function store(Request $request)
     {
 
-        return Dijes::create($request->all());
+         $dije_is_valid = Dijes::where("id", $request->id)->first();
+
+        if ($dije_is_valid) {
+            return response()->json([
+                "message" => 403,
+                "message_text" => 'el dije  ya existe'
+            ]);
+        }
+
+
+        if ($request->hasFile('imagen')) {
+            $path = Storage::putFile("dijes", $request->file('imagen'));
+            $request->request->add(["avatar" => $path]);
+        }
+
+        $dije = Dijes::create($request->all());
+
+        $request->request->add([
+            "dije_id" => $dije->id
+        ]);
     }
+    
 
     /**
      * Display the specified resource.
@@ -48,20 +65,14 @@ class DijeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Dijes $dije)
+    public function show($id)
     {
 
-        if (!$dije) {
-            return response()->json([
-                'message' => 'dije not found.'
-            ], 404);
-        }
+       $dije = Dijes::find($id);
 
         return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'dije' => $dije,
-        ], 200);
+            "dije" => $dije
+        ]);
     }
 
     /**
@@ -74,17 +85,20 @@ class DijeController extends Controller
     public function update(Request $request, $id)
     {
         $dije = Dijes::findOrfail($id);
-        $dije->title = $request->title;
-        $dije->model = $request->model;
-        $dije->description = $request->description;
-        $dije->price = $request->price;
-        $dije->status = $request->status;
-        // $dije->image = $request->image;
-        if($request->image){
-            $dije->image = $request->image;
+         if ($request->hasFile('imagen')) {
+            if ($dije->avatar) {
+                Storage::delete($dije->avatar);
+            }
+            $path = Storage::putFile("dijes", $request->file('imagen'));
+            $request->request->add(["avatar" => $path]);
         }
-        $dije->update();
-        return $dije;
+
+        $dije->update($request->all());
+
+        return response()->json([
+            "message" => 200,
+            "dije" => $dije
+        ]);
     }
 
     public function updateStatus(Request $request, $id)
@@ -106,111 +120,15 @@ class DijeController extends Controller
 
         $dije =  Dijes::where('id', $id)->first();
 
-        if(!empty($dije)){
-
-             // borrar
-             $dije->delete();
-             // devolver respuesta
-             $data = [
-                 'code' => 200,
-                 'status' => 'success',
-                 'dije' => $dije
-             ];
-         }else{
-             $data = [
-                 'code' => 404,
-                 'status' => 'error',
-                 'message' => 'el dije no existe'
-             ];
-         }
-
-         return response()->json($data, $data['code']);
+        $dije = Dijes::findOrFail($id);
+        if ($dije->avatar) {
+            Storage::delete($dije->avatar);
+        }
+        $dije->delete();
+        return response()->json([
+            "message" => 200
+        ]);
     }
 
 
-    /**
-     * @param UploadedFile $file
-     * @return string
-     */
-    protected function generateFileName(UploadedFile $file): string {
-        $extension = $file->getClientOriginalExtension();
-        $fullName = $file->getClientOriginalName();
-        $pathFileName = trim(pathinfo($fullName, PATHINFO_FILENAME));
-        $secureMaxName = substr(Str::slug($pathFileName), 0, 90);
-        return sprintf('%s-%s.%s', $secureMaxName, now()->timestamp, $extension);
-    }
-
-
-
-
-    public function upload(Request $request)
-     {
-         // recoger la imagen de la peticion
-         $image = $request->file('file0');
-         // validar la imagen
-         $validate = \Validator::make($request->all(),[
-             'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
-         ]);
-         //guardar la imagen en un disco
-         if(!$image || $validate->fails()){
-             $data = [
-                 'code' => 400,
-                 'status' => 'error',
-                 'message' => 'Error al subir la imagen'
-             ];
-         }else{
-            $extension = $image->getClientOriginalExtension();
-            $image_name = $image->getClientOriginalName();
-            $pathFileName = trim(pathinfo($image_name, PATHINFO_FILENAME));
-            $secureMaxName = substr(Str::slug($image_name), 0, 90);
-            $image_name = now().$secureMaxName.'.'.$extension;
-
-             \Storage::disk('dijes')->put($image_name, \File::get($image));
-
-             $data = [
-                 'code' => 200,
-                 'status' => 'success',
-                 'image' => $image_name
-             ];
-
-         }
-
-         return response()->json($data, $data['code']);// devuelve un objeto json
-     }
-
-     public function getImage($filename)
-     {
-
-         //comprobar si existe la imagen
-         $isset = \Storage::disk('dijes')->exists($filename);
-         if ($isset) {
-             $file = \Storage::disk('dijes')->get($filename);
-             return new Response($file, 200);
-         } else {
-             $data = array(
-                 'status' => 'error',
-                 'code' => 404,
-                 'mesaje' => 'Imagen no existe',
-             );
-
-             return response()->json($data, $data['code']);
-         }
-
-     }
-
-     public function deleteFoto($id)
-     {
-         $dije = Dijes::findOrFail($id);
-         \Storage::delete('dijes/' . $dije->image);
-         $dije->image = '';
-         $dije->save();
-         return response()->json([
-             'data' => $dije,
-             'msg' => [
-                 'summary' => 'Archivo eliminado',
-                 'detail' => '',
-                 'code' => ''
-             ]
-         ]);
-     }
 }

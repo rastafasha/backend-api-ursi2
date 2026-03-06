@@ -25,7 +25,7 @@ class Profile extends Model
         'instagram',
         'twitter',
         'linkedin',
-        'image',
+        'avatar',
         'status',
     ];
 

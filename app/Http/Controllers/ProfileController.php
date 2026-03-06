@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Profile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -28,7 +28,26 @@ class ProfileController extends Controller
 
     public function profileStore(Request $request)
     {
-        return Profile::create($request->all());
+        $profile_is_valid = Profile::where("id", $request->id)->first();
+
+        if ($profile_is_valid) {
+            return response()->json([
+                "message" => 403,
+                "message_text" => 'el profile  ya existe'
+            ]);
+        }
+
+        if ($request->hasFile('imagen')) {
+            $path = Storage::putFile("profiles", $request->file('imagen'));
+            $request->request->add(["avatar" => $path]);
+        }
+
+
+        $arete = Profile::create($request->all());
+
+        $request->request->add([
+            "arete_id" => $arete->id
+        ]);
     }
 
 
@@ -38,21 +57,14 @@ class ProfileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function profileShow(Profile $profile)
+    public function profileShow($id)
     {
-        // $this->authorize('userShow', User::class);
-
-        if (!$profile) {
-            return response()->json([
-                'message' => 'Profile not found.'
-            ], 404);
-        }
+        
+        $profile = Profile::find($id);
 
         return response()->json([
-            'code' => 200,
-            'status' => 'success',
-            'profile' => $profile,
-        ], 200);
+            "profile" => $profile
+        ]);
     }
 
     public function profileShowUser($id)
@@ -86,25 +98,21 @@ class ProfileController extends Controller
         // $this->authorize('userUpdate', User::class);
 
         $profile = Profile::findOrfail($id);
-        $profile->user_id = $request->user_id;
-        $profile->nombre = $request->nombre;
-        $profile->surname = $request->surname;
-        $profile->direccion = $request->direccion;
-        $profile->estado = $request->estado;
-        $profile->ciudad = $request->ciudad;
-        $profile->telhome = $request->telhome;
-        $profile->telmovil = $request->telmovil;
-        $profile->facebook = $request->facebook;
-        $profile->instagram = $request->instagram;
-        $profile->twitter = $request->twitter;
-        $profile->linkedin = $request->linkedin;
-        $profile->status = $request->status;
-        // $profile->image = $request->image;
-        if($request->image){
-            $profile->image = $request->image;
+        
+         if ($request->hasFile('imagen')) {
+            if ($profile->avatar) {
+                Storage::delete($profile->avatar);
+            }
+            $path = Storage::putFile("profiles", $request->file('imagen'));
+            $request->request->add(["avatar" => $path]);
         }
-        $profile->update();
-        return $profile;
+
+        $profile->update($request->all());
+
+        return response()->json([
+            "message" => 200,
+            "profile" => $profile
+        ]);
     }
 
     /**
@@ -118,46 +126,14 @@ class ProfileController extends Controller
 
         $profile =  Profile::where('id', $id)->first();
 
-        if(!empty($profile)){
-
-             // borrar
-             $profile->delete();
-             // devolver respuesta
-             $data = [
-                 'code' => 200,
-                 'status' => 'success',
-                 'profile' => $profile
-             ];
-         }else{
-             $data = [
-                 'code' => 404,
-                 'status' => 'error',
-                 'message' => 'el profile no existe'
-             ];
-         }
-
-         return response()->json($data, $data['code']);
-    }
-
-    protected function profileInput(): array
-    {
-        return [
-            "nombre" => request("nombre"),
-            "surname" => request("surname"),
-            "direccion" => request("direccion"),
-            "pais" => request("pais"),
-            "estado" => request("estado"),
-            "ciudad" => request("ciudad"),
-            "telhome" => request("telhome"),
-            "telmovil" => request("telmovil"),
-            "facebook" => request("facebook"),
-            "instagram" => request("instagram"),
-            "twitter" => request("twitter"),
-            "linkedin" => request("linkedin"),
-            "image" => request("image"),
-            "email" => request("email"),
-            "status" => request("status"),
-        ];
+         $profile = Profile::findOrFail($id);
+        if ($profile->avatar) {
+            Storage::delete($profile->avatar);
+        }
+        $profile->delete();
+        return response()->json([
+            "message" => 200
+        ]);
     }
 
     public function recientes()
@@ -174,74 +150,4 @@ class ProfileController extends Controller
         ], 200);
     }
 
-    public function upload(Request $request)
-     {
-         // recoger la imagen de la peticion
-         $image = $request->file('file0');
-         // validar la imagen
-         $validate = \Validator::make($request->all(),[
-             'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
-         ]);
-         //guardar la imagen en un disco
-         if(!$image || $validate->fails()){
-             $data = [
-                 'code' => 400,
-                 'status' => 'error',
-                 'message' => 'Error al subir la imagen'
-             ];
-         }else{
-            $extension = $image->getClientOriginalExtension();
-            $image_name = $image->getClientOriginalName();
-            $pathFileName = trim(pathinfo($image_name, PATHINFO_FILENAME));
-            $secureMaxName = substr(Str::slug($image_name), 0, 90);
-            $image_name = now().$secureMaxName.'.'.$extension;
-
-             \Storage::disk('profiles')->put($image_name, \File::get($image));
-
-             $data = [
-                 'code' => 200,
-                 'status' => 'success',
-                 'image' => $image_name
-             ];
-
-         }
-
-         return response()->json($data, $data['code']);// devuelve un objeto json
-     }
-
-     public function getImage($filename)
-     {
-
-         //comprobar si existe la imagen
-         $isset = \Storage::disk('profiles')->exists($filename);
-         if ($isset) {
-             $file = \Storage::disk('profiles')->get($filename);
-             return new Response($file, 200);
-         } else {
-             $data = array(
-                 'status' => 'error',
-                 'code' => 404,
-                 'mesaje' => 'Imagen no existe',
-             );
-
-             return response()->json($data, $data['code']);
-         }
-
-     }
-
-     public function deleteFotoProfile($id)
-     {
-         $profile = Profile::findOrFail($id);
-         \Storage::delete('profiles/' . $profile->image);
-         $profile->image = '';
-         $profile->save();
-         return response()->json([
-             'data' => $profile,
-             'msg' => [
-                 'summary' => 'Archivo eliminado',
-                 'detail' => '',
-                 'code' => ''
-             ]
-         ]);
-     }
 }

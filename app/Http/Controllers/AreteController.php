@@ -67,7 +67,7 @@ class AreteController extends Controller
     public function show($id)
     {
 
-       $arete = Arete::find($id);
+       $arete = Aretes::find($id);
 
         return response()->json([
             "arete" => $arete
@@ -117,7 +117,7 @@ class AreteController extends Controller
     public function destroy($id, Request $request)
     {
 
-        $arete =  Arete::where('id', $id)->first();
+        $arete =  Aretes::where('id', $id)->first();
 
         $arete = Aretes::findOrFail($id);
         if ($arete->avatar) {
