@@ -16,7 +16,7 @@ class CreatePublicacionesTable extends Migration
     {
         Schema::create('publicaciones', function (Blueprint $table) {
             $table->id();
-            $table->string('image')->nullable();
+            $table->string('avatar')->nullable();
             $table->enum('status', [Publicaciones::PUBLISHED, Publicaciones::PENDING, Publicaciones::REJECTED])->default(Publicaciones::PENDING);
             $table->timestamps();
         });

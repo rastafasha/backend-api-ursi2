@@ -21,7 +21,7 @@ class CreateDijesTable extends Migration
             $table->string('model')->nullable();
             $table->text('description')->nullable();
             $table->string('price')->nullable();
-            $table->string('image')->nullable();
+            $table->string('avatar')->nullable();
             $table->enum('status', [Dijes::PUBLISHED, Dijes::PENDING, Dijes::REJECTED])->default(Dijes::PENDING);
             $table->timestamps();
         });

@@ -44,7 +44,6 @@ class AreteController extends Controller
             ]);
         }
 
-
         if ($request->hasFile('imagen')) {
             $path = Storage::putFile("aretes", $request->file('imagen'));
             $request->request->add(["avatar" => $path]);
@@ -116,7 +115,6 @@ class AreteController extends Controller
      */
     public function destroy($id, Request $request)
     {
-
         $arete =  Aretes::where('id', $id)->first();
 
         $arete = Aretes::findOrFail($id);

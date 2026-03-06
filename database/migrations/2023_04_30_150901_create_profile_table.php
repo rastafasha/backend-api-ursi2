@@ -29,7 +29,7 @@ class CreateProfileTable extends Migration
             $table->string('instagram')->nullable();
             $table->string('twitter')->nullable();
             $table->string('linkedin')->nullable();
-            $table->string('image')->nullable();
+            $table->string('avatar')->nullable();
             $table->enum('status', [Profile::VERIFIED, Profile::PENDING, Profile::REJECTED])->default(Profile::PENDING);
             $table->timestamps();
         });

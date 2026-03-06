@@ -16,7 +16,7 @@ class CreateExpocafsTable extends Migration
     {
         Schema::create('expocafs', function (Blueprint $table) {
             $table->id();
-            $table->string('image')->nullable();
+            $table->string('avatar')->nullable();
             $table->enum('status', [Expocaf::PUBLISHED, Expocaf::PENDING, Expocaf::REJECTED])->default(Expocaf::PENDING);
             $table->timestamps();
         });

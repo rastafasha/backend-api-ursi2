@@ -21,7 +21,7 @@ class CreateAretesTable extends Migration
             $table->string('model')->nullable();
             $table->text('description')->nullable();
             $table->string('price')->nullable();
-            $table->string('image')->nullable();
+            $table->string('avatar')->nullable();
             $table->enum('status', [Aretes::PUBLISHED, Aretes::PENDING, Aretes::REJECTED])->default(Aretes::PENDING);
             $table->timestamps();
         });

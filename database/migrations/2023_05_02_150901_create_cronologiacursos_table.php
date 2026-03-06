@@ -24,7 +24,7 @@ class CreateCronologiacursosTable extends Migration
             $table->string('proyecto')->nullable();
             $table->string('duracion')->nullable();
             $table->string('costo')->nullable();
-            $table->string('image')->nullable();
+            $table->string('avatar')->nullable();
             $table->timestamps();
         });
     }

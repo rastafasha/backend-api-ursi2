@@ -19,7 +19,7 @@ class CreatePostsTable extends Migration
             $table->text('description');
             $table->string('slug');
             $table->boolean('isFeatured');
-            $table->string('image')->nullable();
+            $table->string('avatar')->nullable();
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->enum('status', [Post::PUBLISHED, Post::PENDING, Post::REJECTED])->default(Post::PENDING);

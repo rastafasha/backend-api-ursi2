@@ -42,7 +42,7 @@ class AdminUserController extends Controller
             return response()->json([
                 'code' => 200,
                 'status' => 'Listar todos los Usuarios',
-                "users" => UserCollection::make($users)
+                "users" => $users
             ], 200);
     }
 

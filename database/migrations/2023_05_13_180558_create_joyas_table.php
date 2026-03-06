@@ -16,7 +16,7 @@ class CreateJoyasTable extends Migration
     {
         Schema::create('joyas', function (Blueprint $table) {
             $table->id();
-            $table->string('image')->nullable();
+            $table->string('avatar')->nullable();
             $table->enum('status', [Joyas::PUBLISHED, Joyas::PENDING, Joyas::REJECTED])->default(Joyas::PENDING);
             $table->timestamps();
         });

@@ -23,7 +23,7 @@ class CreateCursosTable extends Migration
             $table->string('modal');
             $table->string('slug');
             $table->boolean('isFeatured');
-            $table->string('image')->nullable();
+            $table->string('avatar')->nullable();
             $table->string('urlVideo')->nullable();
             $table->enum('status', [Curso::PUBLISHED, Curso::PENDING, Curso::REJECTED])->default(Curso::PENDING);
             $table->timestamps();

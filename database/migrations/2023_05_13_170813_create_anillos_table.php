@@ -20,7 +20,7 @@ class CreateAnillosTable extends Migration
             $table->string('model')->nullable();
             $table->text('description')->nullable();
             $table->string('price')->nullable();
-            $table->string('image')->nullable();
+            $table->string('avatar')->nullable();
             $table->enum('status', [Anillo::PUBLISHED, Anillo::PENDING, Anillo::REJECTED])->default(Anillo::PENDING);
             $table->timestamps();
 
