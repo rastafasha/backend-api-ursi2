@@ -24,8 +24,8 @@ class CursoController extends Controller
          return response()->json([
             'code' => 200,
             'status' => 'List cursos',
-            // 'herramientas' => $herramientas,
-            "cursos" => CursoCollection::make($cursos),
+            'cursos' => $cursos,
+            // "cursos" => CursoCollection::make($cursos),
         ], 200);
     }
 
@@ -71,7 +71,7 @@ class CursoController extends Controller
         $curso = Curso::find($id);
 
         return response()->json([
-            "curso" => CursoResource::make($curso),
+            "curso" => $curso,
 
         ]);
     }
@@ -88,7 +88,7 @@ class CursoController extends Controller
         'adicional',
         'adicional_eng',
         'slug',
-        'image',
+        'avatar',
         'price',
         ])
             ->where('isFeatured', $featured=true)
@@ -115,7 +115,7 @@ class CursoController extends Controller
         'adicional',
         'adicional_eng',
         'slug',
-        'image',
+        'avatar',
         'price'
         ])
             ->where('status', $status="PUBLISHED")

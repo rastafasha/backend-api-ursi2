@@ -24,8 +24,8 @@ class HerramientaController extends Controller
         return response()->json([
             'code' => 200,
             'status' => 'List herramientas',
-            // 'herramientas' => $herramientas,
-            "herramientas" => HerramientaCollection::make($herramientas),
+            'herramientas' => $herramientas,
+            // "herramientas" => HerramientaCollection::make($herramientas),
         ], 200);
     }
 
@@ -73,7 +73,7 @@ class HerramientaController extends Controller
         $herramienta = Herramienta::find($id);
 
         return response()->json([
-            "herramienta" => HerramientaResource::make($herramienta),
+            "herramienta" => $herramienta,
 
         ]);
     }

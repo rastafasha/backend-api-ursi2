@@ -15,7 +15,6 @@ class CreateGalleryschoolsTable extends Migration
     {
         Schema::create('galleryschools', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->nullable();
             $table->string('avatar')->nullable();
             $table->timestamps();
         });

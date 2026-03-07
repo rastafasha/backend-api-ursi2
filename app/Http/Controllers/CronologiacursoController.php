@@ -24,7 +24,8 @@ class CronologiacursoController extends Controller
        return response()->json([
             'code' => 200,
             'status' => 'List herramientas',
-            "cronologiacursos" => CronogramaCollection::make($cronologiacursos),
+            // "cronologiacursos" => CronogramaCollection::make($cronologiacursos),
+            "cronologiacursos" => $cronologiacursos,
         ], 200);
     }
 
@@ -72,7 +73,7 @@ class CronologiacursoController extends Controller
         $cronologiacurso = Cronologiacurso::find($id);
 
         return response()->json([
-            "cronologiacurso" => CronogramaResource::make($cronologiacurso),
+            "cronologiacurso" => $cronologiacurso,
 
         ]);
     }

@@ -9,7 +9,6 @@ class Galleryschool extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'title',
         'avatar',
     ];
 }

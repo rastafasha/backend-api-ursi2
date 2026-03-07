@@ -75,7 +75,7 @@ class PostController extends Controller
        $post = Post::find($id);
 
         return response()->json([
-            "post" => BlogResource::make($post)
+            "post" => $post
         ]);
     }
 

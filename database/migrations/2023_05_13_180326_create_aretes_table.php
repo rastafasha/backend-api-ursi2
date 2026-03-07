@@ -17,7 +17,6 @@ class CreateAretesTable extends Migration
         Schema::create('aretes', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('slug')->nullable();
             $table->string('model')->nullable();
             $table->text('description')->nullable();
             $table->string('price')->nullable();
