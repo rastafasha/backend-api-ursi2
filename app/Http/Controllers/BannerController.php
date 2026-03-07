@@ -52,7 +52,7 @@ class BannerController extends Controller
             $request->request->add(["avatar" => $path]);
         }
 
-        if ($request->hasFile('imagen')) {
+        if ($request->hasFile('imagemovil')) {
             $path = Storage::putFile("banners", $request->file('imagen'));
             $request->request->add(["avatarmovil" => $path]);
         }
@@ -77,7 +77,7 @@ class BannerController extends Controller
          $banner = Banner::find($id);
 
         return response()->json([
-            "banner" => BannerResource::make($banner)
+            "banner" => $banner
         ]);
     }
 
@@ -101,11 +101,11 @@ class BannerController extends Controller
             $request->request->add(["avatar" => $path]);
         }
 
-        if ($request->hasFile('imagen')) {
+        if ($request->hasFile('imagemovil')) {
             if ($banner->avatarmovil) {
                 Storage::delete($banner->avatarmovil);
             }
-            $path = Storage::putFile("banners", $request->file('imagen'));
+            $path = Storage::putFile("banners", $request->file('imagemovil'));
             $request->request->add(["avatarmovil" => $path]);
         }
 
