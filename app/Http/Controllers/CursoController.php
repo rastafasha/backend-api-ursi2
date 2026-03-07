@@ -116,6 +116,7 @@ class CursoController extends Controller
         'adicional_eng',
         'slug',
         'avatar',
+        'modal',
         'price'
         ])
             ->where('status', $status="PUBLISHED")
