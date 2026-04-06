@@ -26,7 +26,7 @@ class ServiceController extends Controller
         return response()->json([
             'code' => 200,
             'status' => 'List services',
-            "services" => ServicioCollection::make($services),
+            "services" => $services,
         ], 200);
     }
 

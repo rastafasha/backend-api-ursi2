@@ -129,7 +129,7 @@ class PostController extends Controller
             'description_eng',
         'category_id',
         'slug',
-        'image',
+        'avatar',
         ])
             ->where('slug', $slug)
             ->orderBy('id', 'desc')
